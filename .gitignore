@@ -1,0 +1,59 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+
+
+# Virtual environment
+venv/
+env/
+ENV/
+.venv/
+
+# Node modules
+node_modules/
+
+# Frontend build output (if using Next.js or similar)
+.next/
+out/
+
+# Editor/IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Environment files (if you store sensitive settings locally)
+*.env
+
+
+
+# ignore locally-generated test and SBOM artifacts
+/frontend-junit.xml
+/junit.xml
+/sbom.json
+/sbom.spdx

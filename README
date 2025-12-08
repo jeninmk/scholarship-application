@@ -1,0 +1,184 @@
+# UASAMS Training & Documentation
+
+Welcome to the **University of Arizona Scholarship & Applicant Management System (UASAMS)**. This document provides comprehensive guidance, training resources, and support information for both administrators and applicants.
+
+---
+
+## Table of Contents
+
+1. [Overview](#overview)
+2. [Getting Started](#getting-started)
+   - System Requirements
+   - Installation & Setup
+3. [User Roles & Responsibilities](#user-roles--responsibilities)
+   - Administrators
+   - Reviewers
+   - Donors
+   - Applicants
+4. [Administrator Guide](#administrator-guide)
+   - Logging In & Dashboard
+   - User & Role Management
+   - Scholarship Management
+   - Application Management
+   - Reports Engine
+   - Notifications & Alerts
+5. [Reviewer Guide](#reviewer-guide)
+   - Accessing Applications for Review
+   - Submitting Feedback
+   - Viewing Match Scores
+6. [Donor Guide](#donor-guide)
+   - Managing Your Scholarships
+   - Viewing Application Snapshots
+   - Generating Donation Reports
+7. [Applicant Guide](#applicant-guide)
+   - Account Creation & Profile Setup
+   - Browsing & Applying for Scholarships
+   - Document Uploads & Checklists
+   - Viewing Application Status
+   - Managing Saved Scholarships
+8. [Reports Engine](#reports-engine)
+   - Available Scholarships Report
+   - Archived Scholarships Report
+   - Applicant Reports
+   - Awarded Scholarship Reports
+   - Student Demographics Report
+   - Active Donor Report
+9. [FAQ & Troubleshooting](#faq--troubleshooting)
+10. [Contact & Support](#contact--support)
+
+---
+
+## 1. Overview
+
+The UASAMS platform streamlines scholarship creation, application reviews, and selection processes. It provides role-based dashboards, real-time notifications, and a robust reporting engine to support data-driven decisions.
+
+## 2. Getting Started
+
+### System Requirements
+
+- **Backend**: Python 3.11+, Django 5.1, PostgreSQL 15
+- **Frontend**: Node.js 18+, Next.js 13
+- **Docker** (optional): Docker Engine & Docker Compose
+
+### Installation & Setup
+
+1. **Clone the repo**:
+   ```bash
+   git clone <repo-url>
+   cd scholarship-application/monorepo/backend
+   ```
+2. **Backend**:
+   ```bash
+   pip install -r requirements.txt
+   python manage.py migrate
+   python manage.py createsuperuser
+   python manage.py runserver
+   ```
+3. **Frontend**:
+   ```bash
+   cd ../frontend
+   npm install
+   npm run dev
+   ```
+4. **Docker** (optional):
+   ```bash
+   docker-compose up --build
+   ```
+
+## 3. User Roles & Responsibilities
+
+### Administrators
+
+- Full system access: user & role management, scholarship configuration, application oversight, and reporting.
+
+### Reviewers
+
+- Evaluate applications, assign scores, and provide feedback.
+
+### Donors
+
+- Create/manage scholarships, view applicant snapshots, and access donation impact reports.
+
+### Applicants
+
+- Browse scholarships, submit applications, upload required documents, and track statuses.
+
+## 4. Administrator Guide
+
+### Logging In & Dashboard
+
+1. Navigate to `/dashboard`.
+2. Use your admin credentials to sign in.
+
+### User & Role Management
+
+- **Pending Role Requests**: Review and approve requests under **Admin Dashboard > Pending Role Requests**.
+- **Manage Users**: View, lock/unlock, and update user details under **Admin Dashboard > User Management**.
+
+### Scholarship Management
+
+- **Create/Edit Scholarships** via **Admin Dashboard > Scholarship Management**.
+- Fields: name, description, amount, deadline, donor, eligibility, required documents.
+
+### Application Management
+
+- **View Submissions** under **Admin Dashboard > Application Management**.
+- Filter by scholarship, applicant, or status.
+
+### Reports Engine
+
+Access the **Reports** page to generate CSV files:
+
+- Available Scholarships
+- Archived Scholarships
+- Applicant Reports
+- Awarded Scholarships
+- Student Demographics
+- Active Donor Reports
+
+### Notifications & Alerts
+
+- Click the bell icon to view system notifications (e.g., pending requests, deadlines).
+
+## 5. Reviewer Guide
+
+- **Application Queue**: Under **Reviewer Dashboard**, view assigned applications.
+- **Scoring & Feedback**: Click **Review** on an application to enter scores and comments.
+
+## 6. Donor Guide
+
+- **My Scholarships**: Manage scholarship details and status.
+- **Application Snapshot**: View count and summary of applications per scholarship.
+- **Reports**: Navigate to **Reports** and select **Active Donor Report**.
+
+## 7. Applicant Guide
+
+- **Sign Up**: Create an account via **/create-account**.
+- **Profile Setup**: Complete personal info, GPA, major/minor, security questions.
+- **Browse & Apply**: Under **Applicant Dashboard**, click **All Scholarships**. Fill out application forms.
+- **Documents**: Upload transcripts, essays, and recommendations under **Document Checklist**.
+- **Track Status**: Check **My Applications** for submission and award updates.
+
+## 8. Reports Engine
+
+Each report exports a CSV with appropriate columns. Follow on-screen prompts to download reports.
+
+## 9. FAQ & Troubleshooting
+
+**Q:** I can’t see a widget on my dashboard.  
+**A:** Ensure you’re logged in with the correct role. Roles map to dashboards.
+
+**Q:** Report download fails.  
+**A:** Check backend is running at `http://localhost:8000/api/reports`.
+
+## 10. Contact & Support
+
+For further assistance, reach out to the UASAMS support team:
+
+- **Email**: support@uasams.arizona.edu
+- **Phone**: (520) 123‑4567
+- **Office Hours**: Mon–Fri, 9 AM–5 PM MST
+
+---
+
+_Last updated: April 29, 2025_

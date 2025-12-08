@@ -1,0 +1,251 @@
+# # .gitlab-ci.yml  – Scholarship‑Application
+
+# image: node:18 # default image for build / test jobs
+
+# stages:
+#   - build
+#   - test
+#   - sonarqube
+#   # - sbom        # ← Uncomment when you’re ready to generate an SBOM
+
+# # ─────────────────────────────────────────────
+# # 1) Build
+# build-job:
+#   stage: build
+#   script:
+#     - npm install
+#     - npm run build || echo "No build script found, skipping build."
+
+# # ─────────────────────────────────────────────
+# # 2) Frontend Tests
+# test-job:
+#   stage: test
+#   script:
+#     - npm run test || echo "No test script found, skipping tests."
+
+# # ─────────────────────────────────────────────
+# # 3) Backend Tests (pytest + coverage)
+# backend-test:
+#   stage: test
+#   image: python:3.10
+#   variables:
+#     PYTHONUNBUFFERED: "1"
+#   before_script:
+#     - pip install -r monorepo/backend/requirements.txt
+#     - pip install pytest pytest-django pytest-cov
+#   script:
+#     - |
+#       cd monorepo/backend && \
+#       pytest . \
+#         --junitxml=pytest-results.xml \
+#         --cov=. \
+#         --cov-report=xml \
+#         --disable-warnings
+#   artifacts:
+#     paths:
+#       - monorepo/backend/pytest-results.xml
+#       - monorepo/backend/coverage.xml
+#     reports:
+#       junit: monorepo/backend/pytest-results.xml
+#     expire_in: 1 week
+#   only:
+#     - main
+#     - merge_requests
+
+# # ─────────────────────────────────────────────
+# # 4) Static Analysis
+# sonarqube-scan:
+#   stage: sonarqube
+#   image: sonarsource/sonar-scanner-cli:latest
+#   needs:
+#     - test-job
+#     - backend-test
+#   script:
+#     - |
+#       sonar-scanner \
+#         -Dsonar.login=$SONAR_TOKEN \
+#         -Dsonar.host.url=$SONAR_HOST_URL \
+#         -Dsonar.qualitygate.wait=false
+#   only:
+#     - main
+#     - merge_requests
+# # ─────────────────────────────────────────────
+# # 5) SBOM generation  (CycloneDX JSON  +  SPDX tag‑value)
+# #
+# # generate-sbom:
+# #   stage: sbom
+# #   image: alpine:3.19
+# #   before_script:
+# #     - apk add --no-cache curl
+# #     - curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh \
+# #         | sh -s -- -b /usr/local/bin
+# #   script:
+# #     - syft . \
+# #         -o cyclonedx-json=sbom-$CI_COMMIT_SHORT_SHA.json \
+# #         -o spdx=sbom-$CI_COMMIT_SHORT_SHA.spdx \
+# #         --author "Luis Soto" \
+# #         --namespace "$CI_PROJECT_URL" \
+# #         --source-name "Scholarship‑Application-$CI_COMMIT_REF_NAME"
+# #   artifacts:
+# #     when: always
+# #     paths:
+# #       - sbom-*.json
+# #       - sbom-*.spdx
+# #     reports:
+# #       cyclonedx: sbom-*.json   # Appears in GitLab ➜ Security ➜ SBOM
+# #   needs:
+# #     - sonarqube-scan
+# #   only:
+# #     - main
+# #     - merge_requests
+
+# .gitlab-ci.yml  – Scholarship-Application
+
+image: node:18 # default image for build / test jobs
+
+stages:
+  - build
+  - test
+  - sonarqube
+  - sbom # now enabled
+
+# ─────────────────────────────────────────────
+# 1) Build
+build-job:
+  stage: build
+  script:
+    - npm install
+    - npm run build || echo "No build script found, skipping build."
+  only:
+    - main
+    - merge_requests
+
+# ─────────────────────────────────────────────
+# 2) Frontend Tests
+test-job:
+  stage: test
+  image: node:18
+  variables:
+    CI: "true"
+  before_script:
+    # switch into the frontend folder
+    - cd monorepo/frontend
+    # clean, reproducible install
+    - npm ci
+    # add the junit reporter
+    - npm install --no-save jest-junit
+    # regenerate all your stub tests
+    - rm -rf src/__tests__
+    - npm run gen:tests
+  script:
+    # run single-threaded so jest-junit collects every test
+    - npm test -- --runInBand
+  artifacts:
+    paths:
+      - monorepo/frontend/coverage/
+      - monorepo/frontend/frontend-junit.xml
+    reports:
+      junit: monorepo/frontend/frontend-junit.xml
+    expire_in: 1 week
+  only:
+    - main
+    - merge_requests
+
+# ─────────────────────────────────────────────
+# 3) Backend Tests (pytest + coverage)
+backend-test:
+  stage: test
+  image: python:3.10
+  variables:
+    PYTHONUNBUFFERED: "1"
+  before_script:
+    - pip install -r monorepo/backend/requirements.txt
+    - pip install pytest pytest-django pytest-cov
+  script:
+    - |
+      cd monorepo/backend && \
+      pytest . \
+        --junitxml=pytest-results.xml \
+        --cov=. \
+        --cov-report=xml \
+        --disable-warnings
+  artifacts:
+    paths:
+      - monorepo/backend/pytest-results.xml
+      - monorepo/backend/coverage.xml
+    reports:
+      junit: monorepo/backend/pytest-results.xml
+    expire_in: 1 week
+  only:
+    - main
+    - merge_requests
+
+# ─────────────────────────────────────────────
+# 4) Static Analysis
+sonarqube-scan:
+  stage: sonarqube
+  image: sonarsource/sonar-scanner-cli:latest
+  needs:
+    - test-job
+    - backend-test
+  script:
+    - |
+      sonar-scanner \
+        -Dsonar.token=$SONAR_TOKEN \
+        -Dsonar.host.url=$SONAR_HOST_URL \
+        -Dsonar.qualitygate.wait=false \
+        -Dsonar.javascript.lcov.reportPaths=monorepo/frontend/coverage/lcov.info \
+        -Dsonar.exclusions="monorepo/frontend/**" \
+        -Dsonar.coverage.exclusions="monorepo/frontend/**,\
+          monorepo/backend/mybackend/**,\
+          monorepo/backend/manage.py,\
+          monorepo/backend/**/management/commands/**,\
+          monorepo/backend/**/migrations/**,\
+          monorepo/backend/**/admin.py,\
+          monorepo/backend/**/apps.py,\
+          monorepo/backend/**/urls.py" \
+        -Dsonar.python.coverage.reportPaths=monorepo/backend/coverage.xml
+  only:
+    - main
+    - merge_requests
+
+# ─────────────────────────────────────────────
+# 5) SBOM generation  (CycloneDX JSON  +  SPDX tag-value)
+generate-sbom:
+  stage: sbom
+  image: alpine:3.19
+  before_script:
+    - apk add --no-cache curl
+    # install Syft
+    - >
+      curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh |
+      sh -s -- -b /usr/local/bin
+    # install Grype
+    - >
+      curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh |
+      sh -s -- -b /usr/local/bin
+  script:
+    # 1) generate base CycloneDX JSON + SPDX
+    - |
+      syft . \
+        --output cyclonedx-json=sbom-${CI_COMMIT_SHORT_SHA}.json \
+        --output spdx-tag-value=sbom-${CI_COMMIT_SHORT_SHA}.spdx \
+        --source-name "Luis Soto" \
+        --source-version "3.0"
+    # 2) annotate that BOM with CVEs
+    - |
+      grype sbom-${CI_COMMIT_SHORT_SHA}.json \
+        --output cyclonedx-json=sbom-vuln-${CI_COMMIT_SHORT_SHA}.json \
+      || true
+  artifacts:
+    when: always
+    paths:
+      - sbom-*.json
+      - sbom-*.spdx
+    reports:
+      cyclonedx: sbom-vuln-${CI_COMMIT_SHORT_SHA}.json
+  needs:
+    - sonarqube-scan
+  only:
+    - main
+    - merge_requests

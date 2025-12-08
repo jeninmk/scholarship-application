@@ -1,0 +1,22 @@
+{
+  "name": "my-react-project",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "frontend": "cd monorepo/frontend && npm run dev",
+    "backend": "cd monorepo/backend && python manage.py runserver"
+  },
+  "workspaces": [
+    "monorepo/frontend",
+    "monorepo/backend"
+  ],
+  "dependencies": {
+    "axios": "^1.7.9",
+    "lucide-react": "^0.477.0"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^3.4.17"
+  }
+}
