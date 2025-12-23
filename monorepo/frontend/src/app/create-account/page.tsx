@@ -50,6 +50,7 @@ export default function CreateAccountPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    
     try {
       const res = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/api/accounts/create/`,
@@ -59,16 +60,44 @@ export default function CreateAccountPage() {
           body: JSON.stringify(formData),
         }
       );
+      
       if (!res.ok) {
-        const data = await res.json();
-        throw new Error(data.error || "Account creation failed");
+        let errorMessage = "Account creation failed";
+        const contentType = res.headers.get("content-type");
+        
+        if (contentType && contentType.includes("application/json")) {
+          try {
+            const data = await res.json();
+            // Handle different error response formats
+            if (data.error) {
+              errorMessage = data.error;
+            } else if (data.username) {
+              errorMessage = `Username: ${data.username.join(", ")}`;
+            } else if (data.email) {
+              errorMessage = `Email: ${data.email.join(", ")}`;
+            } else if (data.password) {
+              errorMessage = `Password: ${data.password.join(", ")}`;
+            } else {
+              errorMessage = Object.values(data)[0]?.toString() || "Account creation failed";
+            }
+          } catch {
+            errorMessage = "Invalid response from server";
+          }
+        } else {
+          // If response is not JSON, it's likely an HTML error page
+          errorMessage = "Server error occurred. Please try again or contact support.";
+        }
+        throw new Error(errorMessage);
       }
+      
+      const data = await res.json();
       setMessage(
         "Account created successfully! Please wait for admin approval if a role change was requested."
       );
-      setTimeout(() => router.push("/login"), 1500);
-    } catch (err: any) {
-      setError(err.message);
+      setTimeout(() => router.push("/login"), 2000);
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : "An unexpected error occurred";
+      setError(errorMessage);
     }
   };
 
@@ -144,7 +173,7 @@ export default function CreateAccountPage() {
             <input
               type="password"
               name="password"
-              placeholder="Password"
+              placeholder="Password (min 8 characters)"
               value={formData.password}
               onChange={handleChange}
               className="w-full p-3 border rounded-md mb-4 focus:outline-none focus:ring-2 focus:ring-blue-400"
