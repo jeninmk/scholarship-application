@@ -171,14 +171,5 @@ Each report exports a CSV with appropriate columns. Follow on-screen prompts to 
 **Q:** Report download fails.  
 **A:** Check backend is running at `http://localhost:8000/api/reports`.
 
-## 10. Contact & Support
-
-For further assistance, reach out to the UASAMS support team:
-
-- **Email**: support@uasams.arizona.edu
-- **Phone**: (520) 123‑4567
-- **Office Hours**: Mon–Fri, 9 AM–5 PM MST
-
----
 
 _Last updated: April 29, 2025_
